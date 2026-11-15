@@ -44,13 +44,8 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:
 // guarda el archivo y súbelo a GitHub. Lo nuevo aparece con animación la próxima vez que alguien abra la página.
 const PENSAMIENTOS = [
   { fecha: '2026-11-14 22:24', texto: 'estoy programando y pensando en vos, te extraño' },
-  { fecha: '2026-11-14 22:38', texto: 'vi mi galeria mientras procrastinaba por no econtrar un error y nos vi a nosotros.' }
-
-  // Un pensamiento por línea, siempre al final de la lista. Cada línea suma 1 estrella, flor o tallo.
-  // fecha: 'AAAA-MM-DD' o 'AAAA-MM-DD HH:MM' (opcional)   texto: lo que pasaba (opcional)
-  // { fecha: '2026-11-10 22:30', texto: 'Estaba cocinando y me acordé de su risa' },
-  // { fecha: '2026-11-12 08:15', texto: 'Camino al trabajo, sonó nuestra canción' },
-  // { fecha: '2026-11-14' },
+  { fecha: '2026-11-14 22:38', texto: 'vi mi galeria mientras procrastinaba por no econtrar un error y nos vi a nosotros.' },
+  { fecha: '2026-11-14 23:16', texto: 'pense en vos pq te extraño' }
 ];
 const NOMBRE = 'Belén Banega';    // ← su nombre (o déjalo en 'ella')
 const MAX_ESTRELLAS = 150; // etapa 1: las primeras 150 veces son estrellas
@@ -176,7 +171,7 @@ function drawBands(){ctx.lineCap='round';
  bands.forEach((b,i)=>{[['d',BC[i]],['l',LC[i]]].forEach(([k,c])=>{ctx.beginPath();
   for(const g of b[k]){const pr=prog(g,2.5);if(t<g.b)continue;const h=g.h*pr,dx=dxOf(g.x,g.y,h,g.l,g.p);ctx.moveTo(g.x,g.y);ctx.quadraticCurveTo(g.x+dx*.25,g.y-h*.6,g.x+dx,g.y-h*.95);g.sx=g.x+dx;g.sy=g.y-h*.95;g.vis=pr>.8}
   ctx.strokeStyle=c;ctx.lineWidth=.8+i*.5;ctx.stroke()})})}
-function pick(x,y){let b=null,bd=1e9;for(const it of all){if(!it.vis)continue;const d=Math.hypot(it.sx-x,it.sy-y);if(d<it.r*(touch?1.5:1)&&d<bd){bd=d;b=it}}return b}
+function pick(x,y){let b=null,bd=1e9;for(const it of all){if(!it.vis)continue;const d=Math.hypot(it.sx-x,it.sy-y);if(d<it.r*(touch?1.9:1)&&d<bd){bd=d;b=it}}return b}
 let last=0;
 function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;t+=dt;sx+=(sxT-sx)*.05;
  hover=(pmx>-900&&!modal)?pick(pmx,pmy):null;cv.style.cursor=hover?'pointer':'default';
@@ -211,12 +206,12 @@ function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;t+=dt;sx+=(s
  requestAnimationFrame(frame)}
 cv.addEventListener('pointermove',e=>{pmx=e.clientX;pmy=e.clientY;touch=e.pointerType==='touch';sxT=pmx/W-.5});
 cv.addEventListener('pointerleave',()=>{pmx=pmy=-999});
+let openedAt=0;
 cv.addEventListener('pointerdown',e=>{touch=e.pointerType==='touch';pmx=e.clientX;pmy=e.clientY;
  const it=pick(e.clientX,e.clientY);
- if(it){const P=PENSAMIENTOS[it.n-1]||{};$('txt').textContent='Pensamiento n.º '+it.n;$('when').textContent=fmt(P.fecha);$('what').textContent=P.texto||'';$('kind').textContent={star:'Una estrella en el cielo',flower:'Una flor en el campo',blade:'Un tallo de pasto'}[it.k];$('veil').classList.add('on');modal=true;burst(it.sx,it.sy,18)}
- else burst(e.clientX,e.clientY,5);
+ if(it){const P=PENSAMIENTOS[it.n-1]||{};$('txt').textContent='Pensamiento n.º '+it.n;$('when').textContent=fmt(P.fecha);$('what').textContent=P.texto||'';$('kind').textContent={star:'Una estrella en el cielo',flower:'Una flor en el campo',blade:'Un tallo de pasto'}[it.k];$('veil').classList.add('on');modal=true;openedAt=performance.now();burst(it.sx,it.sy,18)}
  if(touch)setTimeout(()=>{pmx=pmy=-999},400)});
-$('veil').addEventListener('click',()=>{$('veil').classList.remove('on');modal=false});
+$('veil').addEventListener('click',()=>{if(performance.now()-openedAt<500)return;$('veil').classList.remove('on');modal=false});
 addEventListener('keydown',e=>{if(e.key==='Escape'){$('veil').classList.remove('on');modal=false}});
 // textos
 function updateTexts(){$('count').textContent=V===0?'Todavía no hay nada aquí':`${V} ${V===1?'vez':'veces'} pensé en ${NOMBRE}`;
